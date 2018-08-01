@@ -30,7 +30,7 @@ Function Get-AADToken {
 }
 
 # Portable module
-Import-Module AzureAD.Standard.Preview
+Import-Module AzureAD
 
 #region Login to Azure Subscription
  # Login-AzureRmAccount
