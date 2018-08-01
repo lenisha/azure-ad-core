@@ -90,6 +90,11 @@ $command = New-Object -TypeName System.Data.SqlClient.SqlCommand($query, $conn)
 $Result = $command.ExecuteScalar()
 $Result
 
+$query = 'CREATE USER [eneros_microsoft.com#EXT#@lenishagmail.onmicrosoft.com] FROM EXTERNAL PROVIDER;'
+$command = New-Object -TypeName System.Data.SqlClient.SqlCommand($query, $conn) 	
+$Result = $command.ExecuteScalar()
+$Result
+
 
 $conn.Close() 
 
