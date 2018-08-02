@@ -68,7 +68,7 @@ Get-AADToken -TenantID $TenantId -ServicePrincipalId $ServicePrincipalId -Servic
 # Connect to Database and exacuet commands
 Write-Output "Create SQL connectionstring"
 $conn = New-Object System.Data.SqlClient.SQLConnection 
-$DatabaseName = 'Master'
+$DatabaseName = 'testpwsh'
 $conn.ConnectionString = "Data Source=$SQLServerName.database.windows.net;Initial Catalog=$DatabaseName;Connect Timeout=30"
 $conn.AccessToken = $($SPNToken)
 $conn
@@ -80,20 +80,30 @@ $command = New-Object -TypeName System.Data.SqlClient.SqlCommand($query, $conn)
 $Result = $command.ExecuteScalar()
 $Result
 
-$query = 'CREATE USER [$ADGroupName] FROM EXTERNAL PROVIDER;'
+# ADD Group using SID
+$ADGroupObjectId = $AADGroup.ObjectId
+$query = "DECLARE @mysid uniqueidentifier = cast('$ADGroupObjectId' as uniqueidentifier); select cast(@mysid as varbinary(max));"
 $command = New-Object -TypeName System.Data.SqlClient.SqlCommand($query, $conn) 	
 $Result = $command.ExecuteScalar()
 $Result
 
-$query = 'CREATE USER [bob@lenishagmail.onmicrosoft.com] FROM EXTERNAL PROVIDER;'
+$hexObjectID = '0x' + (($Result|ForEach-Object ToString X2) -join '')
+
+$query = "CREATE USER [$ADGroupName] WITH SID = $hexObjectID, TYPE = X;"
 $command = New-Object -TypeName System.Data.SqlClient.SqlCommand($query, $conn) 	
 $Result = $command.ExecuteScalar()
 $Result
 
-$query = 'CREATE USER [eneros_microsoft.com#EXT#@lenishagmail.onmicrosoft.com] FROM EXTERNAL PROVIDER;'
-$command = New-Object -TypeName System.Data.SqlClient.SqlCommand($query, $conn) 	
-$Result = $command.ExecuteScalar()
-$Result
+# Example of users TYPE = E
+#$query = 'CREATE USER [bob@lenishagmail.onmicrosoft.com] FROM EXTERNAL PROVIDER;'
+#$command = New-Object -TypeName System.Data.SqlClient.SqlCommand($query, $conn) 	
+#$Result = $command.ExecuteScalar()
+#$Result
+
+#$query = 'CREATE USER [eneros_microsoft.com#EXT#@lenishagmail.onmicrosoft.com] FROM EXTERNAL PROVIDER;'
+#$command = New-Object -TypeName System.Data.SqlClient.SqlCommand($query, $conn) 	
+#$Result = $command.ExecuteScalar()
+#$Result
 
 
 $conn.Close() 
